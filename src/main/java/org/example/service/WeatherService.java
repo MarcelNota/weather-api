@@ -24,12 +24,9 @@ public class WeatherService {
 
     public Weather create(String city) throws Exception {
 
-        JSONObject json =
-                client.getWeather(city);
+        JSONObject json = client.getWeather(city);
 
-        Weather weather =
-                new Weather(
-                        json.getLong("locationId"),
+        Weather weather = new Weather(json.getLong("locationId"),
                         json.getString("name"),
                         json.getDouble("latitude"),
                         json.getDouble("longitude"),
@@ -38,7 +35,7 @@ public class WeatherService {
                         json.getString("timezone"),
                         json.getString("currentTime"),
                         json.getDouble("temperature")
-                );
+        );
 
         return repository.save(weather);
     }
@@ -49,12 +46,7 @@ public class WeatherService {
 
     public Weather getById(Long id) {
 
-        return repository.findById(id)
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                "Weather not found"
-                        )
-                );
+        return repository.findById(id).orElseThrow(() -> new RuntimeException("Weather not found"));
     }
 
     public void delete(Long id) {
