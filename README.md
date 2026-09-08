@@ -1,53 +1,74 @@
 Weather API
 
-REST API desenvolvida em Java/Spring Boot que recebe uma cidade, consulta a Open-Meteo, obtém os dados de localização e do tempo atual e persiste o resultado em PostgreSQL.
+API REST desenvolvida em Java com Spring Boot para consultar dados de uma cidade através da Open-Meteo e guardar as informações no PostgreSQL.
 
 Tecnologias
 
 Java 21
-
 Spring Boot 3.1.3
-
 Spring Web
-
-Spring Data JPA / Hibernate
-
-PostgreSQL 15+ (Docker)
-
+Spring Data JPA
+Hibernate
+PostgreSQL
+Docker
 Maven
+Open-Meteo API
+Postman
 
-Open-Meteo Geocoding API
 
-Open-Meteo Forecast API
 
-Postman (para testes)
+A aplicação recebe o nome de uma cidade, consulta a Open-Meteo para obter os dados da localização e depois consulta os dados meteorológicos atuais.
 
-Pré-requisitos
+As informações obtidas são guardadas no PostgreSQL.
 
-Java 21 instalado
+Os dados principais são:
 
-Maven instalado
-
-Docker Desktop / Docker Engine em execução
+ID do registro
+D da localização
+Nome da cidade
+Latitude
+Longitude
+País
+Código do país
+Timezone
+Hora atual
+Temperatura atual
 
 PostgreSQL com Docker
 
-Criar e iniciar o container:
+O PostgreSQL é executado através de um container Docker.
 
+Para criar o container:
+
+bash
 docker run --name pg-docker \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=local \
   -p 5432:5432 \
   -d postgres
 
-Se o container já existir:
 
+para criar container:
+
+bash
+docker ps
+
+
+se ja existe:
+
+bash
 docker start pg-docker
 
-Configuração
 
+Configuração do banco
+
+Configurações no ficheiro:
+
+text
 src/main/resources/application.properties
 
+
+properties
 spring.application.name=weather-api
 
 spring.datasource.url=jdbc:postgresql://localhost:5432/local
@@ -59,100 +80,155 @@ spring.jpa.show-sql=true
 
 server.port=8080
 
-As tabelas são criadas/atualizadas automaticamente pelo Hibernate.
 
-Executar a aplicação
+o hibernate atualiza as tabelas automaticamente
+
+para executar:
 
 Na raiz do projeto:
 
+bash
 mvn clean package
+
+
+depois:
+
+bash
 mvn spring-boot:run
 
 
-A API fica disponível em:
+app esta em:
 
+text
 http://localhost:8080
 
-Endpoints
 
-Criar previsão por cidade
+Endpoints:
 
+Criar uma previsão
+
+http
 POST /api/weather?city=Maputo
+
 
 Exemplo:
 
-POST http://localhost:8080/api/weather?city=Maputo
+text
+http://localhost:8080/api/weather?city=Maputo
+
 
 Não é necessário enviar Body.
 
 Listar previsões
 
+http
 GET /api/weather
 
-Buscar por ID
 
+Buscar uma previsão por ID
+
+http
 GET /api/weather/{id}
 
+
 Exemplo:
 
-GET http://localhost:8080/api/weather/1
+text
+http://localhost:8080/api/weather/1
 
-Apagar por ID
 
+Apagar uma previsão
+
+http
 DELETE /api/weather/{id}
 
+
 Exemplo:
 
-DELETE http://localhost:8080/api/weather/1
+text
+http://localhost:8080/api/weather/1
 
-Dados retornados
 
-A resposta do POST/GET contém:
+Exemplo de resposta
 
-id - identificador do registro na base de dados
+json
+{
+  "id": 1,
+  "locationId": 1040652,
+  "name": "Maputo",
+  "latitude": -25.96553,
+  "longitude": 32.58322,
+  "country": "Mozambique",
+  "countryCode": "MZ",
+  "timezone": "Africa/Maputo",
+  "currentTime": "2026-09-08T13:30",
+  "temperature": 22.4
+}
 
-locationId - identificador da localização na Open-Meteo
-
-name - cidade
-
-latitude / longitude - coordenadas
-
-country - país
-
-countryCode - código do país
-
-timezone - fuso horário
-
-currentTime - hora atual
-
-temperature - temperatura atual
 
 Fluxo da aplicação
 
-Cliente/Postman
-      ↓
+text
+Postman
+   |
+   v
 WeatherController
-      ↓
+   |
+   v
 WeatherService
-      ↓
+   |
+   v
 OpenMeteoClient
-      ↓
+   |
+   v
 Open-Meteo
-      ↓
-Weather Entity
-      ↓
-WeatherRepository (JPA/Hibernate)
-      ↓
+   |
+   v
+Weather
+   |
+   v
+WeatherRepository
+   |
+   v
+JPA / Hibernate
+   |
+   v
 PostgreSQL
 
-Verificar dados no PostgreSQL
 
+Estrutura principal
+
+text
+src/main/java/org/example
+├── client
+│   └── OpenMeteoClient.java
+├── controller
+│   └── WeatherController.java
+├── entity
+│   └── Weather.java
+├── repository
+│   └── WeatherRepository.java
+├── service
+│   └── WeatherService.java
+└── Main.java
+
+
+Verificar os dados no PostgreSQL
+
+Para entrar no PostgreSQL dentro do container:
+
+bash
 docker exec -it pg-docker psql -U postgres -d local
+
 
 Depois:
 
+
 SELECT * FROM weather;
+
 
 Para sair:
 
+sql
 \q
+
